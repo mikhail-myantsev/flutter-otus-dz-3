@@ -6,7 +6,7 @@ import 'package:recipes/widgets/recipe_card.dart';
 void main() {
   group('App', () {
     testWidgets('отображает список рецептов', (tester) async {
-      await tester.pumpWidget(const App(manager: RecipesManager()));
+      await tester.pumpWidget(App(manager: RecipesManager()));
       await tester.pump();
 
       // Заголовок AppBar является признаком, что стартовый экран собрался целиком
@@ -20,7 +20,7 @@ void main() {
     });
 
     testWidgets('прокручивает список до последнего рецепта', (tester) async {
-      await tester.pumpWidget(const App(manager: RecipesManager()));
+      await tester.pumpWidget(App(manager: RecipesManager()));
       await tester.pump();
 
       // Проверка, что список скроллится и строит карточки за пределами первого экрана

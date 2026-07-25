@@ -5,7 +5,7 @@ import 'screens/recipes_page.dart';
 import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const App(manager: RecipesManager()));
+  runApp(App(manager: RecipesManager()));
 }
 
 class App extends StatelessWidget {
@@ -20,7 +20,7 @@ class App extends StatelessWidget {
       title: 'Otus.Food',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: RecipesPage(recipes: manager.getRecipes()),
+      home: RecipesPage(manager: manager),
     );
   }
 }
