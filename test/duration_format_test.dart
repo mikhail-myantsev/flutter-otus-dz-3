@@ -72,4 +72,11 @@ void main() {
       }
     });
   });
+
+  group('formatDurationSeconds', () {
+    const cases = {0: '00:00', 5: '00:05', 59: '00:59', 60: '01:00', 330: '05:30', 3599: '59:59', 3600: '60:00'};
+    for (final MapEntry(key: seconds, value: expected) in cases.entries) {
+      test('$seconds - $expected', () => expect(formatDurationSeconds(seconds), expected));
+    }
+  });
 }
