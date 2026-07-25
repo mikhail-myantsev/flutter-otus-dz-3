@@ -19,3 +19,15 @@ String formatDurationMinutes(int minutes) {
   final hoursPart = '$hours ${plural(hours, one: 'час', few: 'часа', many: 'часов')}';
   return rest == 0 ? hoursPart : '$hoursPart $minutesPart';
 }
+
+/// Форматирует длительность в секундах как `мм:сс`
+///
+/// ```dart
+/// formatDurationSeconds(330); // '05:30'
+/// formatDurationSeconds(59); // '00:59'
+/// ```
+String formatDurationSeconds(int seconds) {
+  final minutesPart = (seconds ~/ 60).toString().padLeft(2, '0');
+  final secondsPart = (seconds % 60).toString().padLeft(2, '0');
+  return '$minutesPart:$secondsPart';
+}

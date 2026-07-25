@@ -24,5 +24,32 @@ abstract final class AppTheme {
       // Явный `titleTextStyle` не наследует `fontFamily` из темы, поэтому семейство продублировано
       titleTextStyle: TextStyle(fontFamily: 'Roboto', color: AppColors.text, fontSize: 24, fontWeight: FontWeight.w500),
     ),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.field,
+      labelStyle: TextStyle(color: AppColors.primary),
+      floatingLabelStyle: TextStyle(color: AppColors.primary),
+      hintStyle: TextStyle(color: AppColors.placeholder, fontSize: 20, fontWeight: FontWeight.w500),
+      border: UnderlineInputBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
+      ),
+      enabledBorder: UnderlineInputBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
+      ),
+      errorBorder: UnderlineInputBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderSide: BorderSide(color: Colors.red, width: 2),
+      ),
+      focusedErrorBorder: UnderlineInputBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderSide: BorderSide(color: Colors.red, width: 2),
+      ),
+    ),
   );
 }
