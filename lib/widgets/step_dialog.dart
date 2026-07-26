@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/recipe_step.dart';
 import '../theme/app_colors.dart';
 import '../utils/validators.dart';
+import 'landscape_half_width.dart';
 
 /// Показывает диалог ввода шага
 ///
@@ -59,66 +60,68 @@ class _StepDialogState extends State<_StepDialog> {
       backgroundColor: AppColors.background,
       shape: const RoundedRectangleBorder(),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      // Прокрутка спасает от переполнения, когда клавиатура съедает высоту на небольших экранах
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(22),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                const Text('Шаг рецепта', style: TextStyle(fontSize: 16, color: AppColors.text)),
-                TextFormField(
-                  controller: _nameController,
-                  minLines: 5,
-                  maxLines: 5,
-                  validator: validateStepDescription,
-                  decoration: const InputDecoration(labelText: 'Описание шага', alignLabelWithHint: true),
-                ),
-                const Text('Длительность шага', style: TextStyle(fontSize: 10, color: AppColors.text)),
-                Row(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _minutesController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        // Нулевая суммарная длительность у минут в любом случае
-                        validator: (value) =>
-                            validateStepTimePart(value) ??
-                            validateStepDurationTotal(minutes: value, seconds: _secondsController.text),
-                        decoration: const InputDecoration(labelText: 'Минуты', hintText: '59'),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _secondsController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        validator: validateStepTimePart,
-                        decoration: const InputDecoration(labelText: 'Секунды', hintText: '59'),
-                      ),
-                    ),
-                  ],
-                ),
-                Center(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      minimumSize: const Size(232, 48),
-                      shape: const StadiumBorder(),
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                    ),
-                    onPressed: _submit,
-                    child: Text(widget.initial == null ? 'Добавить' : 'Сохранить'),
+      child: LandscapeHalfWidth(
+        // Прокрутка спасает от переполнения, когда клавиатура съедает высоту на небольших экранах
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(22),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  const Text('Шаг рецепта', style: TextStyle(fontSize: 16, color: AppColors.text)),
+                  TextFormField(
+                    controller: _nameController,
+                    minLines: 5,
+                    maxLines: 5,
+                    validator: validateStepDescription,
+                    decoration: const InputDecoration(labelText: 'Описание шага', alignLabelWithHint: true),
                   ),
-                ),
-              ],
+                  const Text('Длительность шага', style: TextStyle(fontSize: 10, color: AppColors.text)),
+                  Row(
+                    spacing: 8,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _minutesController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          // Нулевая суммарная длительность у минут в любом случае
+                          validator: (value) =>
+                              validateStepTimePart(value) ??
+                              validateStepDurationTotal(minutes: value, seconds: _secondsController.text),
+                          decoration: const InputDecoration(labelText: 'Минуты', hintText: '59'),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _secondsController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: validateStepTimePart,
+                          decoration: const InputDecoration(labelText: 'Секунды', hintText: '59'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Center(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        minimumSize: const Size(232, 48),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                      onPressed: _submit,
+                      child: Text(widget.initial == null ? 'Добавить' : 'Сохранить'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

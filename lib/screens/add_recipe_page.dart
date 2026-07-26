@@ -6,6 +6,7 @@ import '../models/recipe_step.dart';
 import '../theme/app_colors.dart';
 import '../utils/validators.dart';
 import '../widgets/ingredient_dialog.dart';
+import '../widgets/landscape_half_width.dart';
 import '../widgets/recipe_ingredient_tile.dart';
 import '../widgets/recipe_step_tile.dart';
 import '../widgets/step_dialog.dart';
@@ -95,108 +96,112 @@ class _AddRecipePageState extends State<AddRecipePage> {
           style: TextStyle(fontFamily: 'Roboto', fontSize: 20, fontWeight: FontWeight.w400, color: AppColors.primary),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        // Для обновления цвета кнопки сохранения
-        onChanged: () => setState(() {}),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 24,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                validator: validateRecipeName,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: const InputDecoration(labelText: 'Название рецепта'),
-              ),
-              // TODO: Заменить на реальное изображение после подключения сервера
-              const Placeholder(fallbackHeight: 215),
-              const Text(
-                'Ингредиенты',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.primary),
-              ),
-              if (_ingredients.isEmpty)
-                const Center(
-                  child: Text('нет ингредиентов', style: TextStyle(fontSize: 12, color: AppColors.text)),
-                )
-              else
-                Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final (index, item) in _ingredients.indexed)
-                      RecipeIngredientTile(
-                        item: item,
-                        onEdit: () => _editIngredient(index),
-                        onDelete: () => setState(() => _ingredients.removeAt(index)),
+      body: Center(
+        child: LandscapeHalfWidth(
+          child: Form(
+            key: _formKey,
+            // Для обновления цвета кнопки сохранения
+            onChanged: () => setState(() {}),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 24,
+                children: [
+                  TextFormField(
+                    controller: _nameController,
+                    validator: validateRecipeName,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(labelText: 'Название рецепта'),
+                  ),
+                  // TODO: Заменить на реальное изображение после подключения сервера
+                  const Placeholder(fallbackHeight: 215),
+                  const Text(
+                    'Ингредиенты',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.primary),
+                  ),
+                  if (_ingredients.isEmpty)
+                    const Center(
+                      child: Text('нет ингредиентов', style: TextStyle(fontSize: 12, color: AppColors.text)),
+                    )
+                  else
+                    Column(
+                      spacing: 8,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (index, item) in _ingredients.indexed)
+                          RecipeIngredientTile(
+                            item: item,
+                            onEdit: () => _editIngredient(index),
+                            onDelete: () => setState(() => _ingredients.removeAt(index)),
+                          ),
+                      ],
+                    ),
+                  Center(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary, width: 3),
+                        minimumSize: const Size(232, 48),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                  ],
-                ),
-              Center(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 3),
-                    minimumSize: const Size(232, 48),
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      onPressed: _addIngredient,
+                      child: const Text('Добавить ингредиент'),
+                    ),
                   ),
-                  onPressed: _addIngredient,
-                  child: const Text('Добавить ингредиент'),
-                ),
-              ),
-              const Text(
-                'Шаги приготовления',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.primary),
-              ),
-              if (_steps.isEmpty)
-                const Center(
-                  child: Text('нет шагов приготовления', style: TextStyle(fontSize: 12, color: AppColors.text)),
-                )
-              else
-                Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final (index, step) in _steps.indexed)
-                      RecipeStepTile(
-                        number: index + 1,
-                        step: step,
-                        onEdit: () => _editStep(index),
-                        onDelete: () => setState(() => _steps.removeAt(index)),
+                  const Text(
+                    'Шаги приготовления',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.primary),
+                  ),
+                  if (_steps.isEmpty)
+                    const Center(
+                      child: Text('нет шагов приготовления', style: TextStyle(fontSize: 12, color: AppColors.text)),
+                    )
+                  else
+                    Column(
+                      spacing: 8,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (index, step) in _steps.indexed)
+                          RecipeStepTile(
+                            number: index + 1,
+                            step: step,
+                            onEdit: () => _editStep(index),
+                            onDelete: () => setState(() => _steps.removeAt(index)),
+                          ),
+                      ],
+                    ),
+                  Center(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary, width: 3),
+                        minimumSize: const Size(232, 48),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                  ],
-                ),
-              Center(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 3),
-                    minimumSize: const Size(232, 48),
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      onPressed: _addStep,
+                      child: const Text('Добавить шаг'),
+                    ),
                   ),
-                  onPressed: _addStep,
-                  child: const Text('Добавить шаг'),
-                ),
-              ),
-              Center(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    disabledBackgroundColor: AppColors.muted,
-                    disabledForegroundColor: AppColors.background,
-                    minimumSize: const Size(232, 48),
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  Center(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        disabledBackgroundColor: AppColors.muted,
+                        disabledForegroundColor: AppColors.background,
+                        minimumSize: const Size(232, 48),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      onPressed: _canSave ? _save : null,
+                      child: const Text('Сохранить рецепт'),
+                    ),
                   ),
-                  onPressed: _canSave ? _save : null,
-                  child: const Text('Сохранить рецепт'),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
