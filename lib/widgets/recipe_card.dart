@@ -68,9 +68,15 @@ class RecipeCard extends StatelessWidget {
                       spacing: 8,
                       children: [
                         const Icon(Icons.access_time, size: 16, color: AppColors.text),
-                        Text(
-                          formatDurationMinutes(recipe.duration),
-                          style: const TextStyle(fontSize: 16, color: AppColors.accent),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              formatDurationMinutes(recipe.duration),
+                              style: const TextStyle(fontSize: 16, color: AppColors.accent),
+                            ),
+                          ),
                         ),
                       ],
                     ),

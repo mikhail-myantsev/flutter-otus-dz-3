@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/recipes_manager.dart';
 import '../theme/app_colors.dart';
+import '../widgets/landscape_half_width.dart';
 import '../widgets/recipe_card.dart';
 import 'add_recipe_page.dart';
 
@@ -40,11 +41,15 @@ class _RecipesPageState extends State<RecipesPage> {
     final recipes = widget.manager.recipes;
     return Scaffold(
       appBar: AppBar(title: const Text('Рецепты')),
-      body: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
-        itemCount: recipes.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 24),
-        itemBuilder: (context, index) => RecipeCard(recipe: recipes[index]),
+      body: Center(
+        child: LandscapeHalfWidth(
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
+            itemCount: recipes.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 24),
+            itemBuilder: (context, index) => RecipeCard(recipe: recipes[index]),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddRecipe,
