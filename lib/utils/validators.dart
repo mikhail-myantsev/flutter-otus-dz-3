@@ -13,10 +13,17 @@ String? validateIngredientName(String? value) => _requireNonBlank(value, 'Вве
 /// Проверяет, что описание шага является непустым после обрезки пробелов
 String? validateStepDescription(String? value) => _requireNonBlank(value, 'Введите описание шага');
 
-/// Проверяет, что количество ингредиента является целым числом больше нуля
+/// Количество ингредиента из текстового значения
+///
+/// Разделителем дробной части может быть как запятая, так и точка
+/// Возвращает `null`, если значение не является числом
+double? parseIngredientCount(String? value) => double.tryParse((value ?? '').trim().replaceAll(',', '.'));
+
+/// Проверяет, что количество ингредиента является числом больше нуля, кратным четверти единицы
 String? validateIngredientCount(String? value) {
-  final count = int.tryParse(value ?? '');
-  return (count == null || count <= 0) ? 'Введите целое число больше нуля' : null;
+  final count = parseIngredientCount(value);
+  final isValid = count != null && count > 0 && (count * 4) % 1 == 0;
+  return isValid ? null : 'Введите число больше нуля, кратное 0,25, например 1,5 или 0,75';
 }
 
 /// Проверяет, что время шага является целым числом больше нуля и меньше 59

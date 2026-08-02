@@ -18,8 +18,8 @@ abstract final class AppTheme {
       foregroundColor: AppColors.text,
       surfaceTintColor: Colors.transparent,
       shadowColor: AppColors.shadow,
-      elevation: 2,
-      scrolledUnderElevation: 2,
+      elevation: 12,
+      scrolledUnderElevation: 12,
       centerTitle: true,
       // Явный `titleTextStyle` не наследует `fontFamily` из темы, поэтому семейство продублировано
       titleTextStyle: TextStyle(fontFamily: 'Roboto', color: AppColors.text, fontSize: 24, fontWeight: FontWeight.w500),

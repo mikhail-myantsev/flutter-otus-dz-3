@@ -16,7 +16,7 @@ void main() {
       expect(() => manager.measureUnits.clear(), throwsUnsupportedError);
     });
 
-    test('addIngredient добавляет ингредиент с новым id и заданной единицей', () {
+    test('добавляется ингредиент с новым id и заданной единицей', () {
       final manager = RecipesManager();
       final unit = manager.measureUnits.first;
       final existingIds = manager.ingredients.map((ingredient) => ingredient.id).toList();
@@ -71,7 +71,7 @@ void main() {
           ],
         );
         expect(exact.duration, 7);
-        // 61 секунда = 2 минуты (округляем вверх)
+        // 61 секунда = 2 минуты с округлением вверх
         final rounded = manager.saveRecipe(
           name: 'Две минуты',
           ingredients: [RecipeIngredient(count: 1, ingredient: manager.ingredients.first)],
@@ -99,6 +99,110 @@ void main() {
           ingredients: [RecipeIngredient(count: 1, ingredient: manager.ingredients.first)],
           steps: const [RecipeStep(name: 'Шаг', duration: 60)],
         );
+        expect(notifications, 1);
+      });
+    });
+
+    group('сиды рецептов', () {
+      test('рецепты из макета наполнены ингредиентами и шагами', () {
+        final manager = RecipesManager();
+        for (final id in const [0, 6]) {
+          final recipe = manager.recipes.firstWhere((recipe) => recipe.id == id);
+          expect(recipe.ingredients, isNotEmpty, reason: 'ингредиенты рецепта $id');
+          expect(recipe.steps, isNotEmpty, reason: 'шаги рецепта $id');
+        }
+      });
+
+      test('лимонный сок отмерен половинками столовых ложек', () {
+        final manager = RecipesManager();
+        final salmon = manager.recipes.firstWhere((recipe) => recipe.id == 0);
+        final lemonJuice = salmon.ingredients.firstWhere((item) => item.ingredient.name == 'Лимонный сок');
+        expect(lemonJuice.count, 1.5);
+        expect(lemonJuice.ingredient.measureUnit.one, 'ст. ложка');
+      });
+
+      test('сумма длительностей шагов совпадает со временем приготовления', () {
+        final manager = RecipesManager();
+        for (final recipe in manager.recipes.where((recipe) => recipe.steps.isNotEmpty)) {
+          final totalSeconds = recipe.steps.fold(0, (sum, step) => sum + step.duration);
+          expect(totalSeconds, recipe.duration * 60, reason: 'шаги рецепта ${recipe.name}');
+        }
+      });
+    });
+
+    group('избранное', () {
+      test('по умолчанию рецепт не в избранном', () => expect(RecipesManager().isFavorite(0), isFalse));
+
+      test('рецепт добавляется в избранное и убирается из него', () {
+        final manager = RecipesManager();
+        manager.toggleFavorite(0);
+        expect(manager.isFavorite(0), isTrue);
+        manager.toggleFavorite(0);
+        expect(manager.isFavorite(0), isFalse);
+      });
+
+      test('отметки разных рецептов независимы', () {
+        final manager = RecipesManager();
+        manager.toggleFavorite(0);
+        expect(manager.isFavorite(0), isTrue);
+        expect(manager.isFavorite(6), isFalse);
+      });
+
+      test('каждое переключение уведомляет слушателей', () {
+        final manager = RecipesManager();
+        var notifications = 0;
+        manager.addListener(() => notifications++);
+        manager.toggleFavorite(0);
+        manager.toggleFavorite(0);
+        expect(notifications, 2);
+      });
+    });
+
+    group('комментарии', () {
+      test('рецепты из макета имеют комментарии-сиды', () {
+        final manager = RecipesManager();
+        expect(manager.commentsOf(0), isNotEmpty);
+        expect(manager.commentsOf(6), isNotEmpty);
+      });
+
+      test('у рецепта без комментариев список пуст', () => expect(RecipesManager().commentsOf(1), isEmpty));
+
+      test('возвращаемые списки нельзя изменить снаружи', () {
+        final manager = RecipesManager();
+        expect(() => manager.commentsOf(0).clear(), throwsUnsupportedError);
+        expect(() => manager.commentsOf(1).clear(), throwsUnsupportedError);
+      });
+
+      test('addComment добавляет комментарий текущего пользователя в конец списка', () {
+        final manager = RecipesManager();
+        final countBefore = manager.commentsOf(0).length;
+        final added = manager.addComment(0, 'Очень вкусно');
+        expect(added.author, 'Вы');
+        expect(added.text, 'Очень вкусно');
+        expect(manager.commentsOf(0), hasLength(countBefore + 1));
+        expect(manager.commentsOf(0).last, added);
+      });
+
+      test('добавление комментария работает для рецепта без комментариев', () {
+        final manager = RecipesManager();
+        final added = manager.addComment(1, 'Первый комментарий');
+        expect(manager.commentsOf(1), [added]);
+      });
+
+      test('датой комментария становится момент добавления', () {
+        final manager = RecipesManager();
+        final before = DateTime.now();
+        final added = manager.addComment(0, 'Только что');
+        final after = DateTime.now();
+        expect(added.date.isBefore(before), isFalse);
+        expect(added.date.isAfter(after), isFalse);
+      });
+
+      test('добавление комментария уведомляет слушателей', () {
+        final manager = RecipesManager();
+        var notifications = 0;
+        manager.addListener(() => notifications++);
+        manager.addComment(0, 'С уведомлением');
         expect(notifications, 1);
       });
     });

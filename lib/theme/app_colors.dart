@@ -16,4 +16,19 @@ abstract final class AppColors {
 
   /// Плейсхолдеры в полях ввода
   static const Color placeholder = Color(0xFFC2C2C2);
+
+  /// Активная кнопка избранного
+  static const Color likeActive = Color(0xFFE74C3C);
+
+  /// Неактивная кнопка избранного
+  static const Color likeInactive = Color(0xB3000000);
+
+  /// Фон отмеченного шага приготовления
+  static const Color stepActiveBackground = Color(0x262ECC71);
+
+  /// Текст отмеченного шага приготовления
+  static const Color stepActiveText = Color(0xFF2D490C);
+
+  /// Разрушающее действие, например удаление фото
+  static const Color danger = Color(0xFFF54848);
 }
