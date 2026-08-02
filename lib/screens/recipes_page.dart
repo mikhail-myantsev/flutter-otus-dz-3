@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../data/recipes_manager.dart';
+import '../models/recipe.dart';
 import '../theme/app_colors.dart';
 import '../widgets/landscape_half_width.dart';
 import '../widgets/recipe_card.dart';
 import 'add_recipe_page.dart';
+import 'recipe_page.dart';
 
 /// Экран рецептов с прокручиваемым списком карточек
 ///
@@ -36,6 +38,8 @@ class _RecipesPageState extends State<RecipesPage> {
 
   void _openAddRecipe() => Navigator.push(context, AddRecipePage.route(manager: widget.manager));
 
+  void _openRecipe(Recipe recipe) => Navigator.push(context, RecipePage.route(manager: widget.manager, recipe: recipe));
+
   @override
   Widget build(BuildContext context) {
     final recipes = widget.manager.recipes;
@@ -47,7 +51,11 @@ class _RecipesPageState extends State<RecipesPage> {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
             itemCount: recipes.length,
             separatorBuilder: (context, index) => const SizedBox(height: 24),
-            itemBuilder: (context, index) => RecipeCard(recipe: recipes[index]),
+            itemBuilder: (context, index) => GestureDetector(
+              onTap: () => _openRecipe(recipes[index]),
+              behavior: HitTestBehavior.opaque,
+              child: RecipeCard(recipe: recipes[index]),
+            ),
           ),
         ),
       ),
