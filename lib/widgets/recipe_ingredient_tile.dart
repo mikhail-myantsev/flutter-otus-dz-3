@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/recipe_ingredient.dart';
 import '../theme/app_colors.dart';
-import '../utils/plural.dart';
+import '../utils/count_format.dart';
 
 /// Карточка позиции состава в форме нового рецепта
 class RecipeIngredientTile extends StatelessWidget {
@@ -19,7 +19,6 @@ class RecipeIngredientTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = item.ingredient.measureUnit;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -39,7 +38,7 @@ class RecipeIngredientTile extends StatelessWidget {
                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.text),
                   ),
                   Text(
-                    '${item.count} ${plural(item.count, one: unit.one, few: unit.few, many: unit.many)}',
+                    formatCount(item.count, item.ingredient.measureUnit),
                     style: const TextStyle(fontSize: 12, color: AppColors.muted),
                   ),
                 ],

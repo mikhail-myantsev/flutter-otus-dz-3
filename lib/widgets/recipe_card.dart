@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../theme/app_colors.dart';
 import '../utils/duration_format.dart';
+import 'image_placeholder.dart';
 
 /// Карточка рецепта
 class RecipeCard extends StatelessWidget {
@@ -33,11 +34,7 @@ class RecipeCard extends StatelessWidget {
                 child: Image.asset(
                   recipe.photo,
                   fit: BoxFit.cover,
-                  // Нейтральная серая заглушка
-                  errorBuilder: (context, error, stackTrace) => const ColoredBox(
-                    color: Color(0xFFEEEEEE),
-                    child: Center(child: Icon(Icons.image_not_supported_outlined, color: Color(0xFFBDBDBD))),
-                  ),
+                  errorBuilder: (_, _, _) => const ImagePlaceholder(),
                 ),
               ),
             ),

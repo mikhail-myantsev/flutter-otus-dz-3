@@ -23,6 +23,24 @@ Future<RecipeIngredient?> showIngredientDialog(
   );
 }
 
+/// Количество для поля ввода
+///
+/// Целые будут без дробной части, а дробные будут с запятой
+///
+/// ```dart
+/// _countText(8); // '8'
+/// _countText(1.5); // '1,5'
+/// _countText(0.75); // '0,75'
+/// _countText(null); // ''
+/// ```
+String _countText(double? count) {
+  if (count == null) {
+    return '';
+  }
+
+  return count % 1 == 0 ? '${count.toInt()}' : count.toString().replaceAll('.', ',');
+}
+
 /// Диалог ввода ингредиента
 ///
 /// Название можно выбрать из каталога, и единица измерения возьмётся из него
@@ -43,7 +61,7 @@ class _IngredientDialog extends StatefulWidget {
 class _IngredientDialogState extends State<_IngredientDialog> {
   final _formKey = GlobalKey<FormState>();
   late String _name = widget.initial?.ingredient.name ?? '';
-  late final _countController = TextEditingController(text: widget.initial?.count.toString());
+  late final _countController = TextEditingController(text: _countText(widget.initial?.count));
 
   /// Единица измерения для нового ингредиента
   MeasureUnit? _newIngredientUnit;
@@ -67,7 +85,10 @@ class _IngredientDialogState extends State<_IngredientDialog> {
 
     // Новое имя попадает в каталог только при подтверждении диалога
     final ingredient = _existing ?? widget.manager.addIngredient(_name.trim(), _newIngredientUnit!);
-    Navigator.pop(context, RecipeIngredient(count: int.parse(_countController.text), ingredient: ingredient));
+
+    // Количество уже проверено, поэтому разбор не вернёт `null`
+    final count = parseIngredientCount(_countController.text)!;
+    Navigator.pop(context, RecipeIngredient(count: count, ingredient: ingredient));
   }
 
   @override
@@ -126,8 +147,8 @@ class _IngredientDialogState extends State<_IngredientDialog> {
                     ),
                   TextFormField(
                     controller: _countController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
                     validator: validateIngredientCount,
                     decoration: InputDecoration(labelText: 'Количество', suffixText: existing?.measureUnit.many),
                   ),
