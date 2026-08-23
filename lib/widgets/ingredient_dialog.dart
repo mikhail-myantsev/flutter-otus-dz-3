@@ -66,6 +66,9 @@ class _IngredientDialogState extends State<_IngredientDialog> {
   /// Единица измерения для нового ингредиента
   MeasureUnit? _newIngredientUnit;
 
+  /// Идёт добавление ингредиента в каталог
+  bool _isSaving = false;
+
   @override
   void dispose() {
     _countController.dispose();
@@ -78,16 +81,30 @@ class _IngredientDialogState extends State<_IngredientDialog> {
     return widget.manager.ingredients.where((i) => i.name.toLowerCase() == query).firstOrNull;
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Новое имя попадает в каталог только при подтверждении диалога
-    final ingredient = _existing ?? widget.manager.addIngredient(_name.trim(), _newIngredientUnit!);
-
     // Количество уже проверено, поэтому разбор не вернёт `null`
     final count = parseIngredientCount(_countController.text)!;
+
+    setState(() => _isSaving = true);
+
+    Ingredient ingredient;
+    try {
+      // Новое имя попадает в каталог только при подтверждении диалога
+      ingredient = _existing ?? await widget.manager.addIngredient(_name.trim(), _newIngredientUnit!);
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     Navigator.pop(context, RecipeIngredient(count: count, ingredient: ingredient));
   }
 
@@ -160,8 +177,13 @@ class _IngredientDialogState extends State<_IngredientDialog> {
                         shape: const StadiumBorder(),
                         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                       ),
-                      onPressed: _submit,
-                      child: Text(widget.initial == null ? 'Добавить' : 'Сохранить'),
+                      onPressed: _isSaving ? null : _submit,
+                      child: _isSaving
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background),
+                            )
+                          : Text(widget.initial == null ? 'Добавить' : 'Сохранить'),
                     ),
                   ),
                 ],
