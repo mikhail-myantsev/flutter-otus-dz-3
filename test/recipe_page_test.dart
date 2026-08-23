@@ -8,13 +8,15 @@ import 'package:recipes/screens/recipe_page.dart';
 import 'package:recipes/widgets/favorite_button.dart';
 import 'package:recipes/widgets/recipe_step_card.dart';
 
+import 'helpers.dart';
+
 void main() {
   group('RecipePage', () {
     /// Открывает страницу рецепта и возвращает менеджер, на котором она построена
     ///
     /// Без [recipe] берётся первый рецепт
     Future<RecipesManager> pumpPage(WidgetTester tester, {Recipe? recipe}) async {
-      final manager = RecipesManager();
+      final manager = await createTestManager();
       await tester.pumpWidget(
         MaterialApp(
           home: RecipePage(manager: manager, recipe: recipe ?? manager.recipes.first),
@@ -295,7 +297,7 @@ void main() {
     });
 
     testWidgets('рецепт без состава и шагов показывает подписи-заглушки', (tester) async {
-      final manager = RecipesManager();
+      final manager = await createTestManager();
       final recipe = manager.recipes.firstWhere((r) => r.ingredients.isEmpty && r.steps.isEmpty);
       await pumpPage(tester, recipe: recipe);
 

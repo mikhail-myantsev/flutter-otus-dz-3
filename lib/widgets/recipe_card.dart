@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../theme/app_colors.dart';
 import '../utils/duration_format.dart';
-import 'image_placeholder.dart';
+import 'recipe_photo.dart';
 
 /// Карточка рецепта
 class RecipeCard extends StatelessWidget {
@@ -29,14 +29,7 @@ class RecipeCard extends StatelessWidget {
             // Фото слева
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(5)),
-              child: SizedBox(
-                width: 149,
-                child: Image.asset(
-                  recipe.photo,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const ImagePlaceholder(),
-                ),
-              ),
+              child: SizedBox(width: 149, child: RecipePhoto(photo: recipe.photo)),
             ),
             // Название и время приготовления справа
             Expanded(

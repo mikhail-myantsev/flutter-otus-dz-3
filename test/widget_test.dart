@@ -1,12 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recipes/data/recipes_manager.dart';
 import 'package:recipes/main.dart';
 import 'package:recipes/widgets/recipe_card.dart';
+
+import 'helpers.dart';
 
 void main() {
   group('App', () {
     testWidgets('отображает список рецептов', (tester) async {
-      await tester.pumpWidget(App(manager: RecipesManager()));
+      await tester.pumpWidget(App(manager: await createTestManager()));
       await tester.pump();
 
       // Заголовок AppBar является признаком, что стартовый экран собрался целиком
@@ -20,7 +21,7 @@ void main() {
     });
 
     testWidgets('прокручивает список до последнего рецепта', (tester) async {
-      await tester.pumpWidget(App(manager: RecipesManager()));
+      await tester.pumpWidget(App(manager: await createTestManager()));
       await tester.pump();
 
       // Проверка, что список скроллится и строит карточки за пределами первого экрана
