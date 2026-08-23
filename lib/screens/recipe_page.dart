@@ -7,9 +7,9 @@ import '../utils/count_format.dart';
 import '../utils/duration_format.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/favorite_button.dart';
-import '../widgets/image_placeholder.dart';
 import '../widgets/landscape_half_width.dart';
 import '../widgets/photo_source_sheet.dart';
+import '../widgets/recipe_photo.dart';
 import '../widgets/recipe_step_card.dart';
 
 /// Страница просмотра рецепта, включающая состав, шаги приготовления и комментарии
@@ -100,7 +100,7 @@ class _RecipePageState extends State<RecipePage> {
           style: TextStyle(fontFamily: 'Roboto', fontSize: 20, fontWeight: FontWeight.w400, color: AppColors.primary),
         ),
         actions: [
-          // TODO: Реализовать после подключения сервера
+          // TODO: Реализовать вместе с публикацией рецепта
           IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
         ],
       ),
@@ -147,11 +147,7 @@ class _RecipePageState extends State<RecipePage> {
                   child: SizedBox(
                     width: double.infinity,
                     height: 220,
-                    child: Image.asset(
-                      recipe.photo,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const ImagePlaceholder(),
-                    ),
+                    child: RecipePhoto(photo: recipe.photo),
                   ),
                 ),
               ),

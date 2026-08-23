@@ -12,4 +12,12 @@ class Ingredient {
 
   /// Единица, в которой измеряется количество ингредиента
   final MeasureUnit measureUnit;
+
+  /// Ингредиенты равны при совпадении идентификатора
+  @override
+  bool operator ==(Object other) => other is Ingredient && other.id == id;
+
+  /// Согласован с [operator ==] и совпадает при равном идентификаторе
+  @override
+  int get hashCode => id.hashCode;
 }

@@ -8,6 +8,7 @@ import '../utils/validators.dart';
 import '../widgets/ingredient_dialog.dart';
 import '../widgets/landscape_half_width.dart';
 import '../widgets/recipe_ingredient_tile.dart';
+import '../widgets/recipe_photo.dart';
 import '../widgets/recipe_step_tile.dart';
 import '../widgets/step_dialog.dart';
 
@@ -33,8 +34,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final _ingredients = <RecipeIngredient>[];
   final _steps = <RecipeStep>[];
 
-  /// Для определения активности кнопки сохранения рецепта
-  bool get _canSave => _nameController.text.trim().isNotEmpty && _ingredients.isNotEmpty && _steps.isNotEmpty;
+  /// Идёт сохранение рецепта
+  bool _isSaving = false;
+
+  /// Для определения активности кнопки сохранения
+  bool get _canSave {
+    return !_isSaving && _nameController.text.trim().isNotEmpty && _ingredients.isNotEmpty && _steps.isNotEmpty;
+  }
 
   @override
   void dispose() {
@@ -78,12 +84,25 @@ class _AddRecipePageState extends State<AddRecipePage> {
     setState(() => _steps[index] = edited);
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    widget.manager.saveRecipe(name: _nameController.text.trim(), ingredients: _ingredients, steps: _steps);
+    setState(() => _isSaving = true);
+
+    try {
+      await widget.manager.saveRecipe(name: _nameController.text.trim(), ingredients: _ingredients, steps: _steps);
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     Navigator.pop(context);
   }
 
@@ -114,8 +133,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(labelText: 'Название рецепта'),
                   ),
-                  // TODO: Заменить на реальное изображение после подключения сервера
-                  const Placeholder(fallbackHeight: 215),
+                  // TODO: Показывать выбранное фото после реализации его загрузки
+                  const SizedBox(height: 215, child: RecipePhoto(photo: '')),
                   const Text(
                     'Ингредиенты',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.primary),
@@ -196,7 +215,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       onPressed: _canSave ? _save : null,
-                      child: const Text('Сохранить рецепт'),
+                      child: _isSaving
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background),
+                            )
+                          : const Text('Сохранить рецепт'),
                     ),
                   ),
                 ],

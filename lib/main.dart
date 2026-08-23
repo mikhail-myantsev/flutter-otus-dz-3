@@ -1,11 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import 'api/food_api_client.dart';
+import 'data/hive_recipes_store.dart';
 import 'data/recipes_manager.dart';
 import 'screens/recipes_page.dart';
 import 'theme/app_theme.dart';
 
-void main() {
-  runApp(App(manager: RecipesManager()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final manager = RecipesManager(api: FoodApiClient(), store: await HiveRecipesStore.open());
+  unawaited(manager.init());
+
+  runApp(App(manager: manager));
 }
 
 class App extends StatelessWidget {

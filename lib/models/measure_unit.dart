@@ -13,4 +13,12 @@ class MeasureUnit {
 
   /// Форма названия для остального количеств единиц
   final String many;
+
+  /// Единицы равны при совпадении идентификатора
+  @override
+  bool operator ==(Object other) => other is MeasureUnit && other.id == id;
+
+  /// Согласован с [operator ==] и совпадает при равном идентификаторе
+  @override
+  int get hashCode => id.hashCode;
 }
