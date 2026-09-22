@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipes/models/recipe_step.dart';
+import 'package:recipes/theme/app_colors.dart';
 import 'package:recipes/widgets/recipe_step_card.dart';
 
 void main() {
@@ -127,6 +128,104 @@ void main() {
       expect(text.top - card.top, textInset);
       expect(card.bottom - text.bottom, textInset);
       expect(tester.takeException(), isNull);
+    });
+
+    group('анимация отметки', () {
+      /// Прозрачности слоёв чекбокса в порядке отрисовки
+      List<double> boxOpacities(WidgetTester tester) {
+        return tester
+            .widgetList<FadeTransition>(
+              find.descendant(of: find.byType(RecipeStepCard), matching: find.byType(FadeTransition)),
+            )
+            .map((fade) => fade.opacity.value)
+            .toList();
+      }
+
+      /// Цвет фона карточки
+      Color cardColor(WidgetTester tester) {
+        final background = tester.widget<DecoratedBox>(
+          find.descendant(of: find.byType(RecipeStepCard), matching: find.byType(DecoratedBox)).first,
+        );
+        return (background.decoration as BoxDecoration).color!;
+      }
+
+      /// Выводит карточку, отметку которой переключает тап по ней
+      Future<Finder> pumpToggleable(WidgetTester tester, {bool checked = false}) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (context, setState) => SizedBox(
+                  width: 400,
+                  child: RecipeStepCard(
+                    number: 2,
+                    step: const RecipeStep(name: shortStep, duration: 420),
+                    checked: checked,
+                    onToggle: () => setState(() => checked = !checked),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        return find.byType(RecipeStepCard);
+      }
+
+      testWidgets('отметка шага плавно заполняет чекбокс', (tester) async {
+        final card = await pumpToggleable(tester);
+        expect(boxOpacities(tester), [1.0, 0.0]);
+
+        await tester.tap(card);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 150));
+
+        // На середине перехода видны оба слоя сразу, то есть состояние не переключилось скачком
+        final [frame, fill] = boxOpacities(tester);
+        expect(frame, inExclusiveRange(0.0, 1.0));
+        expect(fill, inExclusiveRange(0.0, 1.0));
+
+        await tester.pumpAndSettle();
+        expect(boxOpacities(tester), [0.0, 1.0]);
+      });
+
+      testWidgets('снятие отметки проигрывает ту же анимацию назад', (tester) async {
+        final card = await pumpToggleable(tester, checked: true);
+
+        await tester.tap(card);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 150));
+
+        final [frame, fill] = boxOpacities(tester);
+        expect(frame, inExclusiveRange(0.0, 1.0));
+        expect(fill, inExclusiveRange(0.0, 1.0));
+
+        await tester.pumpAndSettle();
+        expect(boxOpacities(tester), [1.0, 0.0]);
+      });
+
+      testWidgets('отмеченный с самого начала шаг рисуется без анимации появления', (tester) async {
+        await pumpToggleable(tester, checked: true);
+
+        expect(boxOpacities(tester), [0.0, 1.0]);
+        expect(cardColor(tester), AppColors.stepActiveBackground);
+      });
+
+      testWidgets('фон карточки перетекает между состояниями', (tester) async {
+        final card = await pumpToggleable(tester);
+        expect(cardColor(tester), AppColors.field);
+
+        await tester.tap(card);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 150));
+
+        final middle = cardColor(tester);
+        expect(middle, isNot(AppColors.field));
+        expect(middle, isNot(AppColors.stepActiveBackground));
+
+        await tester.pumpAndSettle();
+        expect(cardColor(tester), AppColors.stepActiveBackground);
+      });
     });
   });
 }
