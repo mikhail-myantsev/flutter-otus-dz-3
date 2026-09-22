@@ -77,15 +77,23 @@ void main() {
       // Тап обрабатывают вся карточка и чекбокс, он в дереве карточки последний
       final firstCard = find.byType(RecipeStepCard).first;
       final checkbox = find.descendant(of: firstCard, matching: find.byType(GestureDetector)).last;
-      expect(find.byIcon(Icons.check), findsNothing);
+
+      /// Насколько заполнен чекбокс карточки
+      double fill() {
+        final layer = find.descendant(of: firstCard, matching: find.byType(FadeTransition)).last;
+        return tester.widget<FadeTransition>(layer).opacity.value;
+      }
+
+      expect(fill(), 0);
+
+      // Отметка доигрывается до конца, поэтому состояние читается по завершённой анимации
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      expect(fill(), 1);
 
       await tester.tap(checkbox);
-      await tester.pump();
-      expect(find.byIcon(Icons.check), findsOneWidget);
-
-      await tester.tap(checkbox);
-      await tester.pump();
-      expect(find.byIcon(Icons.check), findsNothing);
+      await tester.pumpAndSettle();
+      expect(fill(), 0);
     });
 
     testWidgets('отправленный комментарий появляется в списке', (tester) async {
