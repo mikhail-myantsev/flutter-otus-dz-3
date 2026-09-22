@@ -5,7 +5,7 @@ import '../theme/app_colors.dart';
 import '../utils/duration_format.dart';
 
 /// Карточка шага приготовления на странице рецепта
-class RecipeStepCard extends StatelessWidget {
+class RecipeStepCard extends StatefulWidget {
   const RecipeStepCard({
     super.key,
     required this.number,
@@ -26,6 +26,9 @@ class RecipeStepCard extends StatelessWidget {
   /// Размер области нажатия на чекбокс
   static const double tapSize = 48;
 
+  /// Длительность перехода между состояниями шага
+  static const Duration toggleDuration = Duration(milliseconds: 300);
+
   /// Насколько область нажатия выступает за края чекбокса с каждой стороны
   static const double _tapInset = (tapSize - checkboxSize) / 2;
 
@@ -42,86 +45,143 @@ class RecipeStepCard extends StatelessWidget {
   final VoidCallback onToggle;
 
   @override
+  State<RecipeStepCard> createState() => _RecipeStepCardState();
+}
+
+class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProviderStateMixin {
+  /// Фон карточки
+  static final ColorTween _background = ColorTween(begin: AppColors.field, end: AppColors.stepActiveBackground);
+
+  /// Номер шага
+  static final ColorTween _number = ColorTween(begin: AppColors.placeholder, end: AppColors.accent);
+
+  /// Описание шага
+  static final ColorTween _description = ColorTween(begin: AppColors.muted, end: AppColors.stepActiveText);
+
+  /// Время выполнения шага
+  static final ColorTween _duration = ColorTween(begin: AppColors.muted, end: AppColors.primary);
+
+  /// Ход перехода шага в отмеченное состояние
+  ///
+  /// Уже отмеченный шаг рисуется конечным кадром, поэтому при первой сборке анимация не проигрывается
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: RecipeStepCard.toggleDuration,
+    value: widget.checked ? 1 : 0,
+  );
+
+  /// Заполнение чекбокса и перекраска карточки
+  late final CurvedAnimation _fill = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOut,
+    reverseCurve: Curves.easeIn,
+  );
+
+  /// Появление галочки с лёгким перелётом, чтобы отметка ощущалась щелчком
+  late final CurvedAnimation _checkScale = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutBack,
+    reverseCurve: Curves.easeIn,
+  );
+
+  @override
+  void didUpdateWidget(RecipeStepCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.checked != oldWidget.checked) {
+      if (widget.checked) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _checkScale.dispose();
+    _fill.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MergeSemantics(
       child: Semantics(
-        checked: checked,
+        checked: widget.checked,
         child: GestureDetector(
-          onTap: onToggle,
+          onTap: widget.onToggle,
           behavior: HitTestBehavior.opaque,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: checked ? AppColors.stepActiveBackground : AppColors.field,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            // Высота карточки определяется текстом шага, но не меньше `minHeight`
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: minHeight),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Цвета карточки ведёт тот же контроллер, что и чекбокс, поэтому состояние меняется целиком
+          child: AnimatedBuilder(animation: _fill, builder: (context, _) => _buildCard()),
+        ),
+      ),
+    );
+  }
+
+  /// Карточка в текущем кадре перехода
+  Widget _buildCard() {
+    return DecoratedBox(
+      decoration: BoxDecoration(color: _background.evaluate(_fill), borderRadius: BorderRadius.circular(5)),
+      // Высота карточки определяется текстом шага, но не меньше `minHeight`
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: RecipeStepCard.minHeight),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: RecipeStepCard.numberWidth,
+                child: Center(
+                  child: Text(
+                    '${widget.number}',
+                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: _number.evaluate(_fill)),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 17, 20, 17),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.step.name,
+                      style: TextStyle(fontSize: 12, height: 1.5, color: _description.evaluate(_fill)),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                // Отступы уменьшены на вылет области нажатия, чтобы чекбокс остался на месте
+                padding: const EdgeInsets.only(
+                  top: 33 - RecipeStepCard._tapInset,
+                  right: 22 - RecipeStepCard._tapInset,
+                ),
+                child: Column(
+                  spacing: 14 - RecipeStepCard._tapInset,
                   children: [
-                    SizedBox(
-                      width: numberWidth,
-                      child: Center(
-                        child: Text(
-                          '$number',
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w900,
-                            color: checked ? AppColors.accent : AppColors.placeholder,
-                          ),
+                    GestureDetector(
+                      onTap: widget.onToggle,
+                      behavior: HitTestBehavior.opaque,
+                      // Нажатие уже озвучено узлом карточки, второй узел ему не нужен
+                      excludeFromSemantics: true,
+                      child: SizedBox(
+                        width: RecipeStepCard.tapSize,
+                        height: RecipeStepCard.tapSize,
+                        child: Center(
+                          child: _Checkbox(fill: _fill, checkScale: _checkScale),
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 17, 20, 17),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            step.name,
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.5,
-                              color: checked ? AppColors.stepActiveText : AppColors.muted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      // Отступы уменьшены на вылет области нажатия, чтобы чекбокс остался на месте
-                      padding: const EdgeInsets.only(top: 33 - _tapInset, right: 22 - _tapInset),
-                      child: Column(
-                        spacing: 14 - _tapInset,
-                        children: [
-                          GestureDetector(
-                            onTap: onToggle,
-                            behavior: HitTestBehavior.opaque,
-                            // Нажатие уже озвучено узлом карточки, второй узел ему не нужен
-                            excludeFromSemantics: true,
-                            child: SizedBox(
-                              width: tapSize,
-                              height: tapSize,
-                              child: Center(child: _Checkbox(checked: checked)),
-                            ),
-                          ),
-                          Text(
-                            formatDurationSeconds(step.duration),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: checked ? AppColors.primary : AppColors.muted,
-                            ),
-                          ),
-                        ],
-                      ),
+                    Text(
+                      formatDurationSeconds(widget.step.duration),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _duration.evaluate(_fill)),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -129,24 +189,48 @@ class RecipeStepCard extends StatelessWidget {
   }
 }
 
-/// Квадратный чекбокс шага
+/// Квадратный чекбокс шага, состоящий из пустой рамки и заливки с галочкой
 class _Checkbox extends StatelessWidget {
-  const _Checkbox({required this.checked});
+  const _Checkbox({required this.fill, required this.checkScale});
 
-  /// Отмечен ли чекбокс
-  final bool checked;
+  /// Скруглённый квадрат чекбокса
+  static final BorderRadius _shape = BorderRadius.circular(5);
+
+  /// Ход замены рамки заливкой
+  final Animation<double> fill;
+
+  /// Ход появления галочки
+  final Animation<double> checkScale;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: RecipeStepCard.checkboxSize,
-      height: RecipeStepCard.checkboxSize,
-      decoration: BoxDecoration(
-        color: checked ? AppColors.primary : null,
-        border: checked ? null : Border.all(color: AppColors.muted, width: 4),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: checked ? const Icon(Icons.check, size: 22, color: AppColors.background) : null,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        FadeTransition(
+          opacity: ReverseAnimation(fill),
+          child: Container(
+            width: RecipeStepCard.checkboxSize,
+            height: RecipeStepCard.checkboxSize,
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.muted, width: 4),
+              borderRadius: _shape,
+            ),
+          ),
+        ),
+        FadeTransition(
+          opacity: fill,
+          child: Container(
+            width: RecipeStepCard.checkboxSize,
+            height: RecipeStepCard.checkboxSize,
+            decoration: BoxDecoration(color: AppColors.primary, borderRadius: _shape),
+            child: ScaleTransition(
+              scale: checkScale,
+              child: const Icon(Icons.check, size: 22, color: AppColors.background),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
