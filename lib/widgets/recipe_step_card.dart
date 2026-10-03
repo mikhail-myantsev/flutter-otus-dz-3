@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/recipe_step.dart';
 import '../theme/app_colors.dart';
+import '../theme/recipe_step_colors.dart';
 import '../utils/duration_format.dart';
 
 /// Карточка шага приготовления на странице рецепта
@@ -49,18 +50,6 @@ class RecipeStepCard extends StatefulWidget {
 }
 
 class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProviderStateMixin {
-  /// Фон карточки
-  static final ColorTween _background = ColorTween(begin: AppColors.field, end: AppColors.stepActiveBackground);
-
-  /// Номер шага
-  static final ColorTween _number = ColorTween(begin: AppColors.placeholder, end: AppColors.accent);
-
-  /// Описание шага
-  static final ColorTween _description = ColorTween(begin: AppColors.muted, end: AppColors.stepActiveText);
-
-  /// Время выполнения шага
-  static final ColorTween _duration = ColorTween(begin: AppColors.muted, end: AppColors.primary);
-
   /// Ход перехода шага в отмеченное состояние
   ///
   /// Уже отмеченный шаг рисуется конечным кадром, поэтому при первой сборке анимация не проигрывается
@@ -123,7 +112,10 @@ class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProvid
   /// Карточка в текущем кадре перехода
   Widget _buildCard() {
     return DecoratedBox(
-      decoration: BoxDecoration(color: _background.evaluate(_fill), borderRadius: BorderRadius.circular(5)),
+      decoration: BoxDecoration(
+        color: RecipeStepColors.background.evaluate(_fill),
+        borderRadius: BorderRadius.circular(5),
+      ),
       // Высота карточки определяется текстом шага, но не меньше `minHeight`
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: RecipeStepCard.minHeight),
@@ -136,7 +128,11 @@ class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProvid
                 child: Center(
                   child: Text(
                     '${widget.number}',
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: _number.evaluate(_fill)),
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: RecipeStepColors.number.evaluate(_fill),
+                    ),
                   ),
                 ),
               ),
@@ -147,7 +143,7 @@ class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProvid
                     alignment: Alignment.centerLeft,
                     child: Text(
                       widget.step.name,
-                      style: TextStyle(fontSize: 12, height: 1.5, color: _description.evaluate(_fill)),
+                      style: TextStyle(fontSize: 12, height: 1.5, color: RecipeStepColors.description.evaluate(_fill)),
                     ),
                   ),
                 ),
@@ -176,7 +172,11 @@ class _RecipeStepCardState extends State<RecipeStepCard> with SingleTickerProvid
                     ),
                     Text(
                       formatDurationSeconds(widget.step.duration),
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _duration.evaluate(_fill)),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: RecipeStepColors.duration.evaluate(_fill),
+                      ),
                     ),
                   ],
                 ),
